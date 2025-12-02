@@ -8,9 +8,9 @@
 // - addCoupon: 새 쿠폰 추가
 // - removeCoupon: 쿠폰 삭제
 
-import { Coupon } from '../../types';
-import { initialCoupons } from '../shared/config';
-import { useLocalStorage } from '../shared/lib/useLocalStorage';
+import { Coupon } from '../../../../types';
+import { initialCoupons } from '../../../shared/config';
+import { useLocalStorage } from '../../../shared/lib/useLocalStorage';
 
 export function useCoupons() {
   // TODO: 구현
