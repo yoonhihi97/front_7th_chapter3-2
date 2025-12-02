@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react';
 import { Discount } from '../../types';
 import { useCoupons } from '../hooks/useCoupons';
-import { useProducts } from '../hooks/useProducts';
+import { useProducts } from '../entities/product/model/useProducts';
 import { CloseIcon, PlusIcon, TrashIcon } from '../shared/ui/icons';
 import { ProductWithUI } from '../constants';
 
