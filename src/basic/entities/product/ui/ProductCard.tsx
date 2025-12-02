@@ -10,6 +10,7 @@ type ProductCardProps = {
 
 const ProductCard = ({ product, cart, onAddToCart }: ProductCardProps) => {
   const remainingStock = getRemainingStock(product, cart);
+  // 질문: 프로젝트를 보니, ₩ 형식의 포맷을 사용하는 곳이 여기밖에 없어서 인라인으로 처리했는데 함수로 빼는게 좋을지
   const formattedPrice =
     remainingStock <= 0 ? 'SOLD OUT' : `₩${product.price.toLocaleString()}`;
 
