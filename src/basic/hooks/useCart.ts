@@ -26,7 +26,7 @@
 
 import { useState } from 'react';
 import { CartItem, Coupon, Product } from '../../types';
-import * as cartModel from '../models/cart';
+import * as cartModel from '../entities/cart/model/cart';
 import { useLocalStorage } from '../shared/lib/useLocalStorage';
 
 export function useCart() {
