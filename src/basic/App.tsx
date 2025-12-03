@@ -8,16 +8,11 @@ import {
 import { useLocalStorage } from './shared/lib/useLocalStorage';
 import { useDebounce } from './shared/lib/useDebounce';
 import { useNotification } from './shared/lib/useNotification';
-import ProductCard from './entities/product/ui/ProductCard';
-import ProductGrid from './entities/product/ui/ProductGrid';
 import { useCart } from './features/cart/model/useCart';
-import CartList from './features/cart/ui/CartList';
-import CartSummary from './features/cart/ui/CartSummary';
-import CouponSelector from './features/coupon/ui/CouponSelector';
-import ProductManagement from './features/product-management/ui/ProductManagement';
-import CouponManagement from './features/coupon-management/ui/CouponManagement';
 import Header from './widgets/header/ui/Header';
 import NotificationList from './widgets/notification/ui/NotificationList';
+import AdminPage from './pages/admin/ui/AdminPage';
+import CartPage from './pages/cart/ui/CartPage';
 
 const App = () => {
   // localStorage 연동 상태 (hooks 사용)
@@ -213,150 +208,47 @@ const App = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         {isAdmin ? (
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-gray-900">
-                관리자 대시보드
-              </h1>
-              <p className="text-gray-600 mt-1">
-                상품과 쿠폰을 관리할 수 있습니다
-              </p>
-            </div>
-            <div className="border-b border-gray-200 mb-6">
-              <nav className="-mb-px flex space-x-8">
-                <button
-                  onClick={() => setActiveTab('products')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'products'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  상품 관리
-                </button>
-                <button
-                  onClick={() => setActiveTab('coupons')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === 'coupons'
-                      ? 'border-gray-900 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  쿠폰 관리
-                </button>
-              </nav>
-            </div>
-
-            {activeTab === 'products' ? (
-              <ProductManagement
-                products={products}
-                showProductForm={showProductForm}
-                editingProduct={editingProduct}
-                productForm={productForm}
-                onSetShowProductForm={setShowProductForm}
-                onSetEditingProduct={setEditingProduct}
-                onSetProductForm={setProductForm}
-                onProductSubmit={handleProductSubmit}
-                onStartEditProduct={startEditProduct}
-                onDeleteProduct={deleteProduct}
-                addNotification={addNotification}
-              />
-            ) : (
-              <CouponManagement
-                coupons={coupons}
-                showCouponForm={showCouponForm}
-                couponForm={couponForm}
-                onSetShowCouponForm={setShowCouponForm}
-                onSetCouponForm={setCouponForm}
-                onCouponSubmit={handleCouponSubmit}
-                onDeleteCoupon={deleteCoupon}
-                addNotification={addNotification}
-              />
-            )}
-          </div>
+          <AdminPage
+            products={products}
+            coupons={coupons}
+            activeTab={activeTab}
+            showProductForm={showProductForm}
+            editingProduct={editingProduct}
+            productForm={productForm}
+            showCouponForm={showCouponForm}
+            couponForm={couponForm}
+            onSetActiveTab={setActiveTab}
+            onSetShowProductForm={setShowProductForm}
+            onSetEditingProduct={setEditingProduct}
+            onSetProductForm={setProductForm}
+            onProductSubmit={handleProductSubmit}
+            onStartEditProduct={startEditProduct}
+            onDeleteProduct={deleteProduct}
+            onSetShowCouponForm={setShowCouponForm}
+            onSetCouponForm={setCouponForm}
+            onCouponSubmit={handleCouponSubmit}
+            onDeleteCoupon={deleteCoupon}
+            addNotification={addNotification}
+          />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-3">
-              {/* 상품 목록 */}
-              <section>
-                <div className="mb-6 flex justify-between items-center">
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    전체 상품
-                  </h2>
-                  <div className="text-sm text-gray-600">
-                    총 {products.length}개 상품
-                  </div>
-                </div>
-                {filteredProducts.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">
-                      "{debouncedSearchTerm}"에 대한 검색 결과가 없습니다.
-                    </p>
-                  </div>
-                ) : (
-                  <ProductGrid>
-                    {filteredProducts.map((product) => {
-                      return (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          cart={cart}
-                          onAddToCart={addToCart}
-                        />
-                      );
-                    })}
-                  </ProductGrid>
-                )}
-              </section>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-4">
-                <section className="bg-white rounded-lg border border-gray-200 p-4">
-                  <h2 className="text-lg font-semibold mb-4 flex items-center">
-                    <svg
-                      className="w-5 h-5 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                      />
-                    </svg>
-                    장바구니
-                  </h2>
-                  <CartList
-                    cart={cart}
-                    calculateItemTotal={calculateItemTotal}
-                    onUpdateQuantity={(productId, quantity) =>
-                      updateQuantity(productId, quantity, products)
-                    }
-                    onRemove={removeFromCart}
-                  />
-                </section>
-
-                {cart.length > 0 && (
-                  <>
-                    <CouponSelector
-                      coupons={coupons}
-                      selectedCoupon={selectedCoupon}
-                      onApplyCoupon={applyCoupon}
-                      onClearCoupon={() => setSelectedCoupon(null)}
-                    />
-
-                    <CartSummary
-                      totals={calculateCartTotal()}
-                      onCompleteOrder={completeOrder}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
+          <CartPage
+            products={products}
+            filteredProducts={filteredProducts}
+            cart={cart}
+            coupons={coupons}
+            selectedCoupon={selectedCoupon}
+            debouncedSearchTerm={debouncedSearchTerm}
+            calculateItemTotal={calculateItemTotal}
+            calculateCartTotal={calculateCartTotal}
+            onAddToCart={addToCart}
+            onUpdateQuantity={(productId, quantity) =>
+              updateQuantity(productId, quantity, products)
+            }
+            onRemoveFromCart={removeFromCart}
+            onApplyCoupon={applyCoupon}
+            onClearCoupon={() => setSelectedCoupon(null)}
+            onCompleteOrder={completeOrder}
+          />
         )}
       </main>
     </div>
