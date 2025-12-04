@@ -1,27 +1,12 @@
 import { useProductStore } from '../../../entities/product/model/useProductStore';
-import { useNotificationStore } from '../../../shared/store/useNotificationStore';
 import ProductTable from './ProductTable';
 import ProductForm from './ProductForm';
 
 const ProductManagement = () => {
-  const {
-    products,
-    showProductForm,
-    editingProduct,
-    productForm,
-    setShowProductForm,
-    setEditingProduct,
-    setProductForm,
-    startEditProduct,
-    deleteProduct,
-    addProduct,
-    updateProduct,
-    resetForm,
-  } = useProductStore();
-
-  const addNotification = useNotificationStore(
-    (state) => state.addNotification
-  );
+  const showProductForm = useProductStore((state) => state.showProductForm);
+  const setEditingProduct = useProductStore((state) => state.setEditingProduct);
+  const setProductForm = useProductStore((state) => state.setProductForm);
+  const setShowProductForm = useProductStore((state) => state.setShowProductForm);
 
   const handleAddNew = () => {
     setEditingProduct('new');
@@ -33,27 +18,6 @@ const ProductManagement = () => {
       discounts: [],
     });
     setShowProductForm(true);
-  };
-
-  const handleCancel = () => {
-    resetForm();
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingProduct && editingProduct !== 'new') {
-      updateProduct(editingProduct, productForm);
-      addNotification('상품이 수정되었습니다.', 'success');
-    } else {
-      addProduct(productForm);
-      addNotification('상품이 추가되었습니다.', 'success');
-    }
-    resetForm();
-  };
-
-  const handleDelete = (productId: string) => {
-    deleteProduct(productId);
-    addNotification('상품이 삭제되었습니다.', 'success');
   };
 
   return (
@@ -70,22 +34,9 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      <ProductTable
-        products={products}
-        onEdit={startEditProduct}
-        onDelete={handleDelete}
-      />
+      <ProductTable />
 
-      {showProductForm && (
-        <ProductForm
-          isNew={editingProduct === 'new'}
-          formData={productForm}
-          onSetFormData={setProductForm}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          addNotification={addNotification}
-        />
-      )}
+      {showProductForm && <ProductForm />}
     </section>
   );
 };

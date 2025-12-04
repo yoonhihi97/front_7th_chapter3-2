@@ -1,13 +1,18 @@
-import { ProductWithUI } from '../../../shared/config';
+import { useProductStore } from '../../../entities/product/model/useProductStore';
+import { useNotificationStore } from '../../../shared/store/useNotificationStore';
 import { formatPrice } from '../../../shared/lib/formatters';
 
-type ProductTableProps = {
-  products: ProductWithUI[];
-  onEdit: (product: ProductWithUI) => void;
-  onDelete: (productId: string) => void;
-};
+const ProductTable = () => {
+  const products = useProductStore((state) => state.products);
+  const startEditProduct = useProductStore((state) => state.startEditProduct);
+  const deleteProduct = useProductStore((state) => state.deleteProduct);
+  const addNotification = useNotificationStore((state) => state.addNotification);
 
-const ProductTable = ({ products, onEdit, onDelete }: ProductTableProps) => {
+  const handleDelete = (productId: string) => {
+    deleteProduct(productId);
+    addNotification('상품이 삭제되었습니다.', 'success');
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
@@ -57,13 +62,13 @@ const ProductTable = ({ products, onEdit, onDelete }: ProductTableProps) => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <button
-                  onClick={() => onEdit(product)}
+                  onClick={() => startEditProduct(product)}
                   className="text-indigo-600 hover:text-indigo-900 mr-3"
                 >
                   수정
                 </button>
                 <button
-                  onClick={() => onDelete(product.id)}
+                  onClick={() => handleDelete(product.id)}
                   className="text-red-600 hover:text-red-900"
                 >
                   삭제

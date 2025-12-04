@@ -1,31 +1,34 @@
-export type ProductFormData = {
-  name: string;
-  price: number;
-  stock: number;
-  description: string;
-  discounts: Array<{ quantity: number; rate: number }>;
-};
+import { useProductStore } from '../../../entities/product/model/useProductStore';
+import { useNotificationStore } from '../../../shared/store/useNotificationStore';
 
-type ProductFormProps = {
-  isNew: boolean;
-  formData: ProductFormData;
-  onSetFormData: (form: ProductFormData) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-  addNotification: (message: string, type: 'success' | 'error' | 'warning') => void;
-};
+const ProductForm = () => {
+  const {
+    editingProduct,
+    productForm,
+    setProductForm,
+    addProduct,
+    updateProduct,
+    resetForm,
+  } = useProductStore();
+  const addNotification = useNotificationStore((state) => state.addNotification);
 
-const ProductForm = ({
-  isNew,
-  formData,
-  onSetFormData,
-  onSubmit,
-  onCancel,
-  addNotification,
-}: ProductFormProps) => {
+  const isNew = editingProduct === 'new';
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingProduct && editingProduct !== 'new') {
+      updateProduct(editingProduct, productForm);
+      addNotification('상품이 수정되었습니다.', 'success');
+    } else {
+      addProduct(productForm);
+      addNotification('상품이 추가되었습니다.', 'success');
+    }
+    resetForm();
+  };
+
   return (
     <div className="p-6 border-t border-gray-200 bg-gray-50">
-      <form onSubmit={onSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">
           {isNew ? '새 상품 추가' : '상품 수정'}
         </h3>
@@ -36,10 +39,10 @@ const ProductForm = ({
             </label>
             <input
               type="text"
-              value={formData.name}
+              value={productForm.name}
               onChange={(e) =>
-                onSetFormData({
-                  ...formData,
+                setProductForm({
+                  ...productForm,
                   name: e.target.value,
                 })
               }
@@ -53,10 +56,10 @@ const ProductForm = ({
             </label>
             <input
               type="text"
-              value={formData.description}
+              value={productForm.description}
               onChange={(e) =>
-                onSetFormData({
-                  ...formData,
+                setProductForm({
+                  ...productForm,
                   description: e.target.value,
                 })
               }
@@ -69,12 +72,12 @@ const ProductForm = ({
             </label>
             <input
               type="text"
-              value={formData.price === 0 ? '' : formData.price}
+              value={productForm.price === 0 ? '' : productForm.price}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === '' || /^\d+$/.test(value)) {
-                  onSetFormData({
-                    ...formData,
+                  setProductForm({
+                    ...productForm,
                     price: value === '' ? 0 : parseInt(value),
                   });
                 }
@@ -82,10 +85,10 @@ const ProductForm = ({
               onBlur={(e) => {
                 const value = e.target.value;
                 if (value === '') {
-                  onSetFormData({ ...formData, price: 0 });
+                  setProductForm({ ...productForm, price: 0 });
                 } else if (parseInt(value) < 0) {
                   addNotification('가격은 0보다 커야 합니다', 'error');
-                  onSetFormData({ ...formData, price: 0 });
+                  setProductForm({ ...productForm, price: 0 });
                 }
               }}
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 border"
@@ -99,12 +102,12 @@ const ProductForm = ({
             </label>
             <input
               type="text"
-              value={formData.stock === 0 ? '' : formData.stock}
+              value={productForm.stock === 0 ? '' : productForm.stock}
               onChange={(e) => {
                 const value = e.target.value;
                 if (value === '' || /^\d+$/.test(value)) {
-                  onSetFormData({
-                    ...formData,
+                  setProductForm({
+                    ...productForm,
                     stock: value === '' ? 0 : parseInt(value),
                   });
                 }
@@ -112,16 +115,16 @@ const ProductForm = ({
               onBlur={(e) => {
                 const value = e.target.value;
                 if (value === '') {
-                  onSetFormData({ ...formData, stock: 0 });
+                  setProductForm({ ...productForm, stock: 0 });
                 } else if (parseInt(value) < 0) {
                   addNotification('재고는 0보다 커야 합니다', 'error');
-                  onSetFormData({ ...formData, stock: 0 });
+                  setProductForm({ ...productForm, stock: 0 });
                 } else if (parseInt(value) > 9999) {
                   addNotification(
                     '재고는 9999개를 초과할 수 없습니다',
                     'error'
                   );
-                  onSetFormData({ ...formData, stock: 9999 });
+                  setProductForm({ ...productForm, stock: 9999 });
                 }
               }}
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-3 py-2 border"
@@ -135,7 +138,7 @@ const ProductForm = ({
             할인 정책
           </label>
           <div className="space-y-2">
-            {formData.discounts.map((discount, index) => (
+            {productForm.discounts.map((discount, index) => (
               <div
                 key={index}
                 className="flex items-center gap-2 bg-gray-50 p-2 rounded"
@@ -144,11 +147,11 @@ const ProductForm = ({
                   type="number"
                   value={discount.quantity}
                   onChange={(e) => {
-                    const newDiscounts = [...formData.discounts];
+                    const newDiscounts = [...productForm.discounts];
                     newDiscounts[index].quantity =
                       parseInt(e.target.value) || 0;
-                    onSetFormData({
-                      ...formData,
+                    setProductForm({
+                      ...productForm,
                       discounts: newDiscounts,
                     });
                   }}
@@ -161,11 +164,11 @@ const ProductForm = ({
                   type="number"
                   value={discount.rate * 100}
                   onChange={(e) => {
-                    const newDiscounts = [...formData.discounts];
+                    const newDiscounts = [...productForm.discounts];
                     newDiscounts[index].rate =
                       (parseInt(e.target.value) || 0) / 100;
-                    onSetFormData({
-                      ...formData,
+                    setProductForm({
+                      ...productForm,
                       discounts: newDiscounts,
                     });
                   }}
@@ -178,11 +181,11 @@ const ProductForm = ({
                 <button
                   type="button"
                   onClick={() => {
-                    const newDiscounts = formData.discounts.filter(
+                    const newDiscounts = productForm.discounts.filter(
                       (_, i) => i !== index
                     );
-                    onSetFormData({
-                      ...formData,
+                    setProductForm({
+                      ...productForm,
                       discounts: newDiscounts,
                     });
                   }}
@@ -207,10 +210,10 @@ const ProductForm = ({
             <button
               type="button"
               onClick={() => {
-                onSetFormData({
-                  ...formData,
+                setProductForm({
+                  ...productForm,
                   discounts: [
-                    ...formData.discounts,
+                    ...productForm.discounts,
                     { quantity: 10, rate: 0.1 },
                   ],
                 });
@@ -225,7 +228,7 @@ const ProductForm = ({
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={resetForm}
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             취소
