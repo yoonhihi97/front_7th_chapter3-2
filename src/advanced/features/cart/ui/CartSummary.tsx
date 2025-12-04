@@ -1,13 +1,23 @@
-import { CartTotals } from '../../../entities/cart/model/cart';
+import { useCartStore } from '../../../entities/cart/model/useCartStore';
+import { useCartTotals } from '../../../entities/cart/model/useCartTotals';
+import { useNotificationStore } from '../../../shared/store/useNotificationStore';
 import { formatPrice } from '../../../shared/lib/formatters';
 
-type CartSummaryProps = {
-  totals: CartTotals;
-  onCompleteOrder: () => void;
-};
+const CartSummary = () => {
+  const completeOrder = useCartStore((state) => state.completeOrder);
+  const addNotification = useNotificationStore((state) => state.addNotification);
 
-const CartSummary = ({ totals, onCompleteOrder }: CartSummaryProps) => {
+  // 커스텀 훅으로 장바구니 총액 계산 (cart, selectedCoupon 변경 시 자동 재계산)
+  const totals = useCartTotals();
   const discountAmount = totals.totalBeforeDiscount - totals.totalAfterDiscount;
+
+  const handleCompleteOrder = () => {
+    const orderNumber = completeOrder();
+    addNotification(
+      `주문이 완료되었습니다. 주문번호: ${orderNumber}`,
+      'success'
+    );
+  };
 
   return (
     <section className="bg-white rounded-lg border border-gray-200 p-4">
@@ -34,7 +44,7 @@ const CartSummary = ({ totals, onCompleteOrder }: CartSummaryProps) => {
       </div>
 
       <button
-        onClick={onCompleteOrder}
+        onClick={handleCompleteOrder}
         className="w-full mt-4 py-3 bg-yellow-400 text-gray-900 rounded-md font-medium hover:bg-yellow-500 transition-colors"
       >
         {formatPrice(totals.totalAfterDiscount)} 결제하기
