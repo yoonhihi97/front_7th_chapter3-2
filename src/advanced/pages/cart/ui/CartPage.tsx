@@ -1,71 +1,32 @@
-import { ProductWithUI } from '../../../shared/config';
 import { useProductStore } from '../../../entities/product/model/useProductStore';
-import { useCartStore } from '../../../features/cart/model/useCartStore';
-import { useCouponStore } from '../../../entities/coupon/model/useCouponStore';
-import { useNotificationStore } from '../../../shared/store/useNotificationStore';
+import { useCartStore } from '../../../entities/cart/model/useCartStore';
+import { useSearchStore } from '../../../shared/store/useSearchStore';
+import { useDebounce } from '../../../shared/lib/useDebounce';
 import ProductCard from '../../../entities/product/ui/ProductCard';
 import ProductGrid from '../../../entities/product/ui/ProductGrid';
 import CartList from '../../../features/cart/ui/CartList';
 import CartSummary from '../../../features/cart/ui/CartSummary';
 import CouponSelector from '../../../features/coupon/ui/CouponSelector';
 
-type CartPageProps = {
-  filteredProducts: ProductWithUI[];
-  debouncedSearchTerm: string;
-};
+const CartPage = () => {
+  const searchTerm = useSearchStore((state) => state.searchTerm);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-const CartPage = ({ filteredProducts, debouncedSearchTerm }: CartPageProps) => {
   const products = useProductStore((state) => state.products);
-  const {
-    cart,
-    selectedCoupon,
-    setSelectedCoupon,
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    calculateItemTotal,
-    calculateCartTotal,
-    completeOrder,
-    applyCoupon,
-  } = useCartStore();
-  const coupons = useCouponStore((state) => state.coupons);
-  const addNotification = useNotificationStore(
-    (state) => state.addNotification
-  );
+  const cart = useCartStore((state) => state.cart);
 
-  const handleAddToCart = (product: ProductWithUI) => {
-    const result = addToCart(product);
-    if (result.success) {
-      addNotification(result.message || '장바구니에 담았습니다', 'success');
-    } else {
-      addNotification(result.message || '오류가 발생했습니다', 'error');
-    }
-  };
-
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
-    const result = updateQuantity(productId, quantity, products);
-    if (!result.success && result.message) {
-      addNotification(result.message, 'error');
-    }
-  };
-
-  const handleApplyCoupon = (coupon: typeof selectedCoupon) => {
-    if (!coupon) return;
-    const result = applyCoupon(coupon);
-    if (result.success) {
-      addNotification(result.message || '쿠폰이 적용되었습니다.', 'success');
-    } else {
-      addNotification(result.message || '쿠폰 적용 실패', 'error');
-    }
-  };
-
-  const handleCompleteOrder = () => {
-    const orderNumber = completeOrder();
-    addNotification(
-      `주문이 완료되었습니다. 주문번호: ${orderNumber}`,
-      'success'
-    );
-  };
+  const filteredProducts = debouncedSearchTerm
+    ? products.filter(
+        (product) =>
+          product.name
+            .toLowerCase()
+            .includes(debouncedSearchTerm.toLowerCase()) ||
+          (product.description &&
+            product.description
+              .toLowerCase()
+              .includes(debouncedSearchTerm.toLowerCase()))
+      )
+    : products;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -86,12 +47,7 @@ const CartPage = ({ filteredProducts, debouncedSearchTerm }: CartPageProps) => {
           ) : (
             <ProductGrid>
               {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  cart={cart}
-                  onAddToCart={handleAddToCart}
-                />
+                <ProductCard key={product.id} product={product} />
               ))}
             </ProductGrid>
           )}
@@ -117,27 +73,13 @@ const CartPage = ({ filteredProducts, debouncedSearchTerm }: CartPageProps) => {
               </svg>
               장바구니
             </h2>
-            <CartList
-              cart={cart}
-              calculateItemTotal={calculateItemTotal}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemove={removeFromCart}
-            />
+            <CartList />
           </section>
 
           {cart.length > 0 && (
             <>
-              <CouponSelector
-                coupons={coupons}
-                selectedCoupon={selectedCoupon}
-                onApplyCoupon={handleApplyCoupon}
-                onClearCoupon={() => setSelectedCoupon(null)}
-              />
-
-              <CartSummary
-                totals={calculateCartTotal()}
-                onCompleteOrder={handleCompleteOrder}
-              />
+              <CouponSelector />
+              <CartSummary />
             </>
           )}
         </div>

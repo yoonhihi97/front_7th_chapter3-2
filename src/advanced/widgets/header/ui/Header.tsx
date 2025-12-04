@@ -1,20 +1,19 @@
+import { useCartStore } from '../../../entities/cart/model/useCartStore';
+import { useSearchStore } from '../../../shared/store/useSearchStore';
+
 type HeaderProps = {
   isAdmin: boolean;
-  searchTerm: string;
-  totalItemCount: number;
-  cartLength: number;
   onToggleAdmin: () => void;
-  onSearchChange: (value: string) => void;
 };
 
-const Header = ({
-  isAdmin,
-  searchTerm,
-  totalItemCount,
-  cartLength,
-  onToggleAdmin,
-  onSearchChange,
-}: HeaderProps) => {
+const Header = ({ isAdmin, onToggleAdmin }: HeaderProps) => {
+  const cart = useCartStore((state) => state.cart);
+  const cartLength = cart.length;
+  const totalItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const searchTerm = useSearchStore((state) => state.searchTerm);
+  const setSearchTerm = useSearchStore((state) => state.setSearchTerm);
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40 border-b">
       <div className="max-w-7xl mx-auto px-4">
@@ -26,7 +25,7 @@ const Header = ({
                 <input
                   type="text"
                   value={searchTerm}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="상품 검색..."
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 />
